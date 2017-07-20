@@ -10,11 +10,6 @@ import ScrollToTopOnMount from './ScrollToTopOnMount';
 
 const MAP_API_KEY = 'AIzaSyDoEKTDIXDrskeTDNXGSGwEbGQVkDtFxb4';
 
-const HouseDetailsViewer = styled.div`
-  width: 100%;
-  overflow: hidden;
-`;
-
 const HouseDetails = styled.div`
   display: flex;
   position: relative;
@@ -43,43 +38,41 @@ const House = ({id, match}) => {
     const {address: {street, city, state, zip}, image, summary} = house;
 
     return (
-        <div>
+      <div>
         <ScrollToTopOnMount />            
 
-        {/*
-           Always render the contents. Use value of `match` param to alter 
-           contents if needed.
-         */}
-        <Route path={`/house/${id}/viewing`} children={({ match }) => (
-            <div>
-                <HouseImage image={image} height={ Boolean(match) ? '150px' : '300px' }>
-                  <HouseTitle>{street}, {city}, {state} {zip}</HouseTitle>
-                </HouseImage>
-                
-                <HouseDetailsViewer>
-                  <HouseDetails leftOffset={ Boolean(match) ? '-50%' : 0 }>
+        <HouseImage image={image} height={'300px'}>
+          <HouseTitle>{street}, {city}, {state} {zip}</HouseTitle>
+        </HouseImage>
 
-                    {/* Panel 1, 50% width */}
-                    <Map 
-                      mode="place" 
-                      apiKey={MAP_API_KEY}
-                      params={`q=${city}+${state}`}
-                      width="100%"
-                    />
+        <Route path={`/house/${id}/viewing`} children={({ match }) => {
 
-                    {/* Panel 2, 50% width */}
-                    <HouseSummary summary={summary} id={id} />
-
-                    {/* Panel 3, 50% width */}
-                    <RequestViewingForm id={id} />
-
-                  </HouseDetails>
-                </HouseDetailsViewer>
-
-            </div>
-        )}/>
-        </div>
-        
+          if (match) {
+            // SUBROUTE for requesting a house viewing
+            return (
+              <HouseDetails>
+                <HouseSummary summary={summary} id={id} />
+                <RequestViewingForm id={id} />
+              </HouseDetails>
+            )
+          } else {
+            // INITIAL STATE
+            return (
+              <HouseDetails>
+                <Map 
+                  mode="place" 
+                  apiKey={MAP_API_KEY}
+                  params={`q=${city}+${state}`}
+                  width="100%"
+                />
+                <HouseSummary summary={summary} id={id} />
+              </HouseDetails> 
+            );
+          }
+          
+        }} />
+          
+      </div>
     );
 };
 
